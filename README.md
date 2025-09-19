@@ -27,7 +27,7 @@
 * 🗄 **Хранение:** PostgreSQL
 * 🌐 **Realtime:** WebSocket (Channels) + Uvicorn/Nginx
 * 💻 **Frontend:** JavaScript, Bootstrap, адаптивный UI (teacher / student / admin)
-* 🤖 **AI:** OpenAI / Groq (генерация контента)
+* 🤖 **AI:** GenAI / Groq (генерация контента)
 * 🔊 **Audio:** edge-tts
 * 🎥 **Видео:** Jitsi
 * 💳 **Платежи:** YooKassa
