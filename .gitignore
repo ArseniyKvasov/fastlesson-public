@@ -1,0 +1,63 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.egg-info/
+*.egg
+*.log
+
+# --- Django ---
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+.env
+.env.local
+.env.*.local
+
+# Скрытые файлы Django (migrations cache, compiled stuff)
+*.pot
+*.mo
+
+# --- Миграции ---
+**/migrations/*.py
+!**/migrations/__init__.py
+
+# --- Virtualenv ---
+venv/
+env/
+.venv/
+ENV/
+env.bak/
+
+# --- VS Code / IDE ---
+.vscode/
+.idea/
+*.iml
+
+# --- OS specific ---
+.DS_Store
+Thumbs.db
+
+# --- pytest / coverage ---
+.coverage
+*.cover
+.cache/
+.pytest_cache/
+htmlcov/
+
+# --- mypy / lint ---
+.mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
+
+# --- Build / dist ---
+build/
+dist/
+.eggs/
+
+fastlesson_bot/config.pydb.sqlite3
+celerybeat-schedule.db

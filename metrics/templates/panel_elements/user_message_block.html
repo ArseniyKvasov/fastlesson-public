@@ -1,0 +1,110 @@
+<div class="container my-4">
+    {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message|safe }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Составить сообщение</h5>
+
+            <form method="post" action="/metrics/send-mass-message/" id="massMessageForm">
+                {% csrf_token %}
+
+                <!-- Выбор получателей -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Кому</label>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="targets_type" id="allUsers" value="all" checked>
+                        <label class="form-check-label" for="allUsers">Всем пользователям</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="targets_type" id="specificUsers" value="specific">
+                        <label class="form-check-label" for="specificUsers">Конкретные пользователи (через запятую)</label>
+                    </div>
+                    <input type="text" class="form-control mt-2" id="specificIds" placeholder="Например: 12345,67890" disabled>
+                </div>
+
+                <!-- Скрытое поле targets -->
+                <input type="hidden" name="targets" id="targetsField" value="all">
+
+                <!-- Текст сообщения -->
+                <div class="mb-3">
+                    <label for="id_markdown" class="form-label fw-semibold">Текст (Markdown)</label>
+                    <textarea id="id_markdown" name="markdown_text" class="form-control" rows="6" placeholder="Введите текст сообщения...">{{ markdown_text }}</textarea>
+                </div>
+
+                <!-- Дополнительная кнопка -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Доп. кнопка (опционально)</label>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" name="extra_btn_text" id="extraBtnText" placeholder="Текст кнопки (например: Подробнее)">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" name="extra_btn_url" id="extraBtnUrl" placeholder="URL">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" name="extra_btn_command" id="extraBtnCommand" placeholder="Команда (например: open_profile)">
+                        </div>
+                    </div>
+                    <div class="form-text">
+                        Можно указать <strong>или</strong> URL, <strong>или</strong> команду.<br>
+                        Если заполнено оба поля — сохранится ошибка.
+                    </div>
+                </div>
+
+
+                <!-- Кнопки -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <button type="submit" class="btn btn-primary">Отправить</button>
+                    <button type="button" class="btn btn-outline-secondary" id="previewBtn">Предпросмотр</button>
+                </div>
+            </form>
+
+            <hr>
+            <h6 class="fw-semibold">Предпросмотр</h6>
+            <div id="mdPreview" class="border rounded p-3" style="min-height:120px; white-space:pre-wrap; background-color:#f8f9fa;">
+                {{ markdown_text }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    const textarea = document.getElementById('id_markdown');
+    const preview = document.getElementById('mdPreview');
+    const btn = document.getElementById('previewBtn');
+    const allRadio = document.getElementById('allUsers');
+    const specificRadio = document.getElementById('specificUsers');
+    const specificInput = document.getElementById('specificIds');
+    const targetsField = document.getElementById('targetsField');
+    const form = document.getElementById('massMessageForm');
+
+    // Предпросмотр Markdown
+    btn?.addEventListener('click', () => {
+        const text = textarea.value || '';
+        let html = text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br>');
+        preview.innerHTML = html;
+    });
+
+    // Включаем/отключаем поле конкретных ID
+    function toggleSpecificInput() {
+        specificInput.disabled = !specificRadio.checked;
+    }
+    allRadio.addEventListener('change', toggleSpecificInput);
+    specificRadio.addEventListener('change', toggleSpecificInput);
+
+    // Заполняем targets перед отправкой формы
+    form.addEventListener('submit', () => {
+        targetsField.value = allRadio.checked ? 'all' : specificInput.value;
+    });
+})();
+</script>

@@ -1,0 +1,84 @@
+<div class="container my-4">
+    <div class="row g-3 mb-3">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Всего пользователей</h6>
+                    <h4 class="card-title">{{ aggregated.total_users }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Средний retention (дней)</h6>
+                    <h4 class="card-title">{{ aggregated.avg_retention_days|floatformat:2 }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Всего PDF</h6>
+                    <h4 class="card-title">{{ aggregated.total_pdf_downloads }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Активных (7д)</h6>
+                    <h4 class="card-title">{{ aggregated.active_last_7_days }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Пользователи</h5>
+            {% if user_metrics_qs and user_metrics_qs.exists %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Telegram_id</th>
+                                <th>Имя</th>
+                                <th>Роль</th>
+                                <th>Уровни</th>
+                                <th>Зарегистрирован</th>
+                                <th>Последняя активность</th>
+                                <th>Retention (дн)</th>
+                                <th>Последняя генерация</th>
+                                <th>PDF</th>
+                                <th>Осталось генераций</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in user_metrics_qs %}
+                                <tr>
+                                    <td>{{ u.user.id }}</td>
+                                    <td>{{ u.user.telegram_id }}</td>
+                                    <td>@{{ u.user.telegram_username }}</td>
+                                    <td>{{ u.user.role }}</td>
+                                    <td>{{ u.user.level }}</td>
+                                    <td>{{ u.registered_at }}</td>
+                                    <td>{{ u.last_active_at }}</td>
+                                    <td>{{ u.retention_days }}</td>
+                                    <td>{{ u.last_generated_at|default:'-' }}</td>
+                                    <td>{{ u.pdf_download_count }}</td>
+                                    <td>
+                                        <strong>{{ u.user.remaining_generations }}</strong><br>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">Данных по пользователям нет.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>

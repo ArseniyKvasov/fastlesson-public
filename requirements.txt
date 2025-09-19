@@ -1,0 +1,13 @@
+aiogram==3.*
+django
+djangorestframework
+python-dotenv
+redis
+celery
+groq
+google-genai
+python-docx
+markdown
+bs4
+gunicorn
+"aiogram[redis]"

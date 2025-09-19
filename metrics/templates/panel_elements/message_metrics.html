@@ -1,0 +1,28 @@
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Текст сообщения</th>
+            <th>Всего пользователей</th>
+            <th>Ожидает</th>
+            <th>Отправлено</th>
+            <th>Использовано</th>
+            <th>Ошибка</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for msg in messages %}
+            <tr>
+                <td>{{ msg.text|truncatechars:50 }}</td>
+                <td>{{ msg.total }}</td>
+                <td>{{ msg.pending }}</td>
+                <td>{{ msg.sent }}</td>
+                <td>{{ msg.used }}</td>
+                <td class="{% if msg.error %}bg-danger text-white{% endif %}">{{ msg.error }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">Нет сообщений</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

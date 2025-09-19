@@ -1,0 +1,130 @@
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Тикеты технической поддержки</h3>
+        <div>
+            <a href="?show_completed=1" class="btn btn-outline-secondary btn-sm">Показать все</a>
+            <a href="?show_completed=0" class="btn btn-outline-primary btn-sm">Только открытые</a>
+        </div>
+    </div>
+
+    {% if tickets and tickets.exists %}
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Пользователь</th>
+                        <th scope="col">Статус</th>
+                        <th scope="col">Создано</th>
+                        <th scope="col">Последнее сообщение</th>
+                        <th scope="col" class="text-end">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tickets %}
+                        <tr>
+                            <td class="align-middle">{{ t.ticket_id }}</td>
+                            <td class="align-middle">@{{ t.username }}<br><small class="text-muted">{{ t.user_id }}</small></td>
+                            <td class="align-middle">
+                                {% if t.status == "received" %}
+                                    <span class="badge bg-warning text-dark">Получено</span>
+                                {% elif t.status == "in_progress" %}
+                                    <span class="badge bg-info text-dark">В работе</span>
+                                {% elif t.status == "done" %}
+                                    <span class="badge bg-success">Выполнено</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ t.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="align-middle"><small class="text-muted">{{ t.created_at }}</small></td>
+                            <td class="align-middle">
+                                {% with last=t.messages.last %}
+                                    {% if last %}
+                                        {{ last.text|truncatechars:1200 }}
+                                        {% if last.attachment_id %}
+                                            <div><small class="text-muted">Есть вложение</small></div>
+                                        {% endif %}
+                                    {% else %}
+                                        <small class="text-muted">—</small>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td class="align-middle text-end">
+                                <div class="btn-group" role="group">
+                                    {% if status_change_url %}
+                                        {% comment %}status_change_url expected to accept ticket_id via format or be callable that returns url{% endcomment %}
+                                        <a href="{{ status_change_url|default:'#' }}" class="btn btn-sm btn-outline-primary">Поменять статус</a>
+                                    {% endif %}
+                                    <a href="#" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#ticketModal{{ t.id }}">Открыть</a>
+                                </div>
+
+                                <!-- Modal: подробности тикета -->
+                                <div class="modal fade" id="ticketModal{{ t.id }}" tabindex="-1" aria-labelledby="ticketModalLabel{{ t.id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="ticketModalLabel{{ t.id }}">Тикет {{ t.ticket_id }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p><strong>Пользователь:</strong> @{{ t.username }} ({{ t.user_id }})</p>
+                                                <p><strong>Текущий статус:</strong> {{ t.get_status_display }}</p>
+                                                <hr>
+
+                                                <!-- Сообщения -->
+                                                <div class="list-group mb-3">
+                                                    {% for m in t.messages.all %}
+                                                        <div class="list-group-item">
+                                                            <div class="d-flex justify-content-between">
+                                                                <div>{{ m.text|default:"(вложение)" }}</div>
+                                                                <div><small class="text-muted">{{ m.created_at }}</small></div>
+                                                            </div>
+                                                            {% if m.attachment_id %}
+                                                                <div class="mt-2">
+                                                                    <small class="text-muted">Attachment: {{ m.attachment_id }}</small>
+                                                                </div>
+                                                                <a href="{% url 'support_attachment_download' m.id %}"
+                                                                   class="btn btn-sm btn-outline-secondary mt-2"
+                                                                   target="_blank" rel="noopener">
+                                                                    Скачать
+                                                                </a>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% empty %}
+                                                        <div class="list-group-item text-muted">Нет сообщений</div>
+                                                    {% endfor %}
+                                                </div>
+
+                                                <!-- Форма смены статуса -->
+                                                <form method="post" action="{% url 'support_change_status' t.id %}">
+                                                    {% csrf_token %}
+                                                    <div class="mb-3">
+                                                        <label for="statusSelect{{ t.id }}" class="form-label">Изменить статус</label>
+                                                        <select name="status" id="statusSelect{{ t.id }}" class="form-select">
+                                                            {% for key, label in status_choices.items %}
+                                                                <option value="{{ key }}" {% if t.status == key %}selected{% endif %}>
+                                                                    {{ label }}
+                                                                </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">Тикетов не найдено.</div>
+    {% endif %}
+</div>
